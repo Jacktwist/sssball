@@ -1,0 +1,8 @@
+[package]
+name = "sssb"
+version = "0.1.0"
+authors = ["Liam <william.doring@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+tcod = "0.13"
