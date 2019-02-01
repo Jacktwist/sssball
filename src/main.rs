@@ -4,6 +4,7 @@ use tcod::console::*;
 use tcod::colors::{self, Color};
 
 // scale of 1 square in inches 1.5 feet or 18 inches which is about avg shoulder width
+// all size values for the field should be divided by this for scaling
 const SQUARE_SCALE: i32 = 18;
 
 
@@ -13,7 +14,7 @@ const SCREEN_HEIGHT: i32 = 50;
 
 // size of field in inches
 
-const FIELD_HEIGHT: i32 = 4320;
+const FIELD_HEIGHT: i32 = 3600;
 const END_ZONE_HEIGHT: i32 = 360;
 const FIELD_WIDTH: i32 = 1920;
 const FIELD_BORDER_WIDTH: i32 = 72;
@@ -42,6 +43,12 @@ const MAP_WIDTH: i32 = (FIELD_WIDTH+FIELD_BORDER_WIDTH*2+RESTRAINING_LINE_WIDTH*
                         +COACHING_BOX_WIDTH*2+BENCHES_WIDTH*2+PADDING_WIDTH*2)/SQUARE_SCALE;
 const MAP_HEIGHT: i32 = (FIELD_HEIGHT+FIELD_BORDER_WIDTH*2+PADDING_WIDTH*2)/SQUARE_SCALE;
 
+const CAMERA_WIDTH: i32 = SCREEN_WIDTH * 5 / 6 as i32;
+const CAMERA_HEIGHT: i32 = SCREEN_HEIGHT;
+const CAMERA_X_BOUND: i32 = CAMERA_WIDTH / 2 as i32;
+const CAMERA_Y_BOUND: i32 = CAMERA_HEIGHT / 2 as i32;
+const CAMERA_X_START: i32 = CAMERA_X_BOUND+1;
+const CAMERA_Y_START: i32 = CAMERA_Y_BOUND+1;
 type Map = Vec<Vec<Tile>>;
 
 // 20 frames-per-second maximum
@@ -57,16 +64,47 @@ const COLOR_ORANGE: Color = Color { r: 255, g: 119, b: 119};
 struct Camera {
     x: i32,
     y: i32,
-    width: i32,
-    height: i32,
+    tlx: i32,
+    tly: i32,
 }
 impl Camera {
-    pub fn new(x: i32, y: i32, width: i32, height: i32) -> Self{
+    pub fn new() -> Self{
         Camera{
-            x: x,
-            y: y,
-            width: width,
-            height: height,
+            x: CAMERA_X_START,
+            y: CAMERA_Y_START,
+            tlx: (CAMERA_X_START - CAMERA_X_BOUND) as i32,
+            tly: (CAMERA_Y_START - CAMERA_Y_BOUND) as i32,
+        }
+    }
+    pub fn move_by(&mut self, dx: i32, dy: i32){
+        if dx != 0 {
+            if self.x - CAMERA_X_BOUND + dx <= 0 {
+                    self.x = CAMERA_X_BOUND;
+                    self.tlx = 0;
+                }
+            else if self.x + dx + CAMERA_X_BOUND >=  MAP_WIDTH {
+                    self.x = MAP_WIDTH - CAMERA_X_BOUND;
+                    self.tlx = MAP_WIDTH - CAMERA_WIDTH;
+                }
+            else {
+                self.x += dx;
+                self.tlx += dx;
+            }
+        }
+        if dy != 0{
+            if self.y - CAMERA_Y_BOUND + dy <= 0 {
+                self.y = CAMERA_Y_BOUND;
+                self.tly = 0;
+            }
+            else if self.y + dy + CAMERA_Y_BOUND >= MAP_HEIGHT {
+                self.y = MAP_HEIGHT - CAMERA_Y_BOUND;
+                self.tly = MAP_HEIGHT - CAMERA_HEIGHT;
+            }
+             else {
+
+                self.y += dy;
+                self.tly += dy;
+            }
         }
     }
 }
@@ -115,6 +153,8 @@ impl Object {
         }
     }
 
+
+
     /// move by the given amount, if the destination is not blocked
     pub fn move_by(&mut self, dx: i32, dy: i32, map: &Map) {
         if !map[(self.x + dx) as usize][(self.y + dy) as usize].blocked {
@@ -124,15 +164,24 @@ impl Object {
     }
 
     /// set the color and then draw the character that represents this object at its position
-    pub fn draw(&self, con: &mut Console) {
-        con.set_default_foreground(self.color);
-        con.put_char(self.x, self.y, self.char, BackgroundFlag::None);
-    }
-
+    pub fn draw(&self, con: &mut Console, camera: &Camera) {
+        if  self.x >= camera.tlx &&
+            self.x <= camera.tlx + CAMERA_WIDTH &&
+            self.y >= camera.tly &&
+            self.y <= camera.tly + CAMERA_HEIGHT {
+                con.set_default_foreground(self.color);
+                con.put_char(self.x - camera.tlx, self.y - camera.tly, self.char, BackgroundFlag::None);
+            }
+        }
     /// Erase the character that represents this object
-    pub fn clear(&self, con: &mut Console) {
-        con.put_char(self.x, self.y, ' ', BackgroundFlag::None);
-    }
+    pub fn clear(&self, con: &mut Console, camera: &Camera) {
+        if  self.x >= camera.tlx &&
+            self.x <= camera.tlx + CAMERA_WIDTH &&
+            self.y >= camera.tly &&
+            self.y <= camera.tly + CAMERA_HEIGHT {
+                con.put_char(self.x - camera.tlx, self.y - camera.tly, ' ', BackgroundFlag::None);
+            }
+        }c
 }
 
 // scales inches to ascii blocks for drawing
@@ -212,25 +261,32 @@ fn make_map() -> Map {
     map
 }
 
-fn render_all(root: &mut Root, con: &mut Offscreen, objects: &[Object], map: &Map) {
+fn render_all(root: &mut Root, con: &mut Offscreen, objects: &[Object], map: &Map, camera: &Camera) {
     // go through all tiles, and set their background color
-    for y in 0..MAP_HEIGHT {
-        for x in 0..MAP_WIDTH {
-            let a_tile = map[x as usize][y as usize];
+    for y in 0..SCREEN_HEIGHT {
+        for x in 0..SCREEN_WIDTH {
+            con.set_char_background(x, y, colors::LIGHT_GREY, BackgroundFlag::Set);
+        }
+    }
+
+    //draw the map in the camera
+    for y in 0..CAMERA_HEIGHT {
+        for x in 0..CAMERA_WIDTH {
+            let a_tile = map[(x + camera.tlx) as usize][(y + camera.tly) as usize];
                 con.set_char_background(x, y, a_tile.color, BackgroundFlag::Set);
         }
     }
 
     // draw all objects in the list
     for object in objects {
-        object.draw(con);
+        object.draw(con, &camera);
     }
 
     // blit the contents of "con" to the root console
     blit(con, (0, 0), (MAP_WIDTH, MAP_HEIGHT), root, (0, 0), 1.0, 1.0);
 }
 
-fn handle_keys(root: &mut Root, player: &mut Object, map: &Map) -> bool {
+fn handle_keys(root: &mut Root, player: &mut Object, map: &Map, camera: &mut Camera) -> bool {
     use tcod::input::Key;
     use tcod::input::KeyCode::*;
 
@@ -248,7 +304,10 @@ fn handle_keys(root: &mut Root, player: &mut Object, map: &Map) -> bool {
         Key { code: Down, .. } => player.move_by(0, 1, map),
         Key { code: Left, .. } => player.move_by(-1, 0, map),
         Key { code: Right, .. } => player.move_by(1, 0, map),
-
+        Key { printable: 'w', .. } => camera.move_by(0, -1),
+        Key { printable: 's', .. } => camera.move_by(0, 1),
+        Key { printable: 'a', .. } => camera.move_by(-1, 0),
+        Key { printable: 'd', .. } => camera.move_by(1, 0),
         _ => {},
     }
 
@@ -271,26 +330,27 @@ fn main() {
     // create an NPC
     let npc = Object::new(SCREEN_WIDTH / 2 - 5, SCREEN_HEIGHT / 2, '@', Color{r:255, g:119, b:119});
 
-    // the list of objects with those two
+    // the list of objects
     let mut objects = [player, npc];
 
     // generate map (at this point it's not drawn to the screen)
     let map = make_map();
+    let mut camera = Camera::new();
 
     while !root.window_closed() {
         // render the screen
-        render_all(&mut root, &mut con, &objects, &map);
+        render_all(&mut root, &mut con, &objects, &map, &mut camera);
 
         root.flush();
 
         // erase all objects at their old locations, before they move
         for object in &objects {
-            object.clear(&mut con)
+            object.clear(&mut con, &camera)
         }
 
         // handle keys and exit game if needed
         let player = &mut objects[0];
-        let exit = handle_keys(&mut root, player, &map);
+        let exit = handle_keys(&mut root, player, &map, &mut camera);
         if exit {
             break
         }
