@@ -181,7 +181,8 @@ impl Object {
             self.y <= camera.tly + CAMERA_HEIGHT {
                 con.put_char(self.x - camera.tlx, self.y - camera.tly, ' ', BackgroundFlag::None);
             }
-        }c
+        }
+    }
 }
 
 // scales inches to ascii blocks for drawing
