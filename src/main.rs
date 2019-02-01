@@ -214,6 +214,7 @@ fn make_map() -> Map {
         map[(MAP_WIDTH-1) as usize][y as usize] = Tile::wall();
     }
     map[(MAP_WIDTH-1) as usize][(MAP_HEIGHT-1) as usize] = Tile::wall();
+
     //fill field boundary
     let mut x1 = (MAP_WIDTH/2) - (FIELD_WIDTH/2 + FIELD_BORDER_WIDTH)/SQUARE_SCALE;
     let mut y1 = (MAP_HEIGHT/2) - (FIELD_HEIGHT/2 + FIELD_BORDER_WIDTH)/SQUARE_SCALE;
