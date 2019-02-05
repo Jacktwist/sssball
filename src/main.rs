@@ -184,6 +184,7 @@ impl Object {
         }
     }
 
+
 // scales inches to ascii blocks for drawing
 
 fn map_rect(h: i32, w: i32) -> (i32, i32) {
@@ -203,15 +204,15 @@ fn make_map() -> Map {
     let mut map = vec![vec![Tile::grass(); MAP_HEIGHT as usize]; MAP_WIDTH as usize];
 
     // fill outer wall
-    for x in 0..MAP_WIDTH-1{
+    for x in 0..MAP_WIDTH{
         map[x as usize][0] = Tile::wall();
         map[x as usize][(MAP_HEIGHT-1) as usize] = Tile::wall();
     }
-    for y in 0..MAP_HEIGHT-1 {
+    for y in 0..MAP_HEIGHT {
         map[0][y as usize] = Tile::wall();
         map[(MAP_WIDTH-1) as usize][y as usize] = Tile::wall();
     }
-    map[(MAP_WIDTH-1) as usize][(MAP_HEIGHT-1) as usize] = Tile::wall();
+
     //fill field boundary
     let mut x1 = (MAP_WIDTH/2) - (FIELD_WIDTH/2 + FIELD_BORDER_WIDTH)/SQUARE_SCALE;
     let mut y1 = (MAP_HEIGHT/2) - (FIELD_HEIGHT/2 + FIELD_BORDER_WIDTH)/SQUARE_SCALE;

@@ -1,0 +1,64 @@
+{
+  "sapiotypes" : [
+    {
+      "terran" : {
+      "ability_mods" : {},
+      "age" : "18",
+      "abilities" : [
+        "talent"
+      ]
+    }
+  },
+  {
+    "kalonian" : {
+      "ability_mods" : {
+        "strength" : "-1",
+        "endurance" : "-1"
+      },
+      "age" : "18",
+      "abilities" : [
+        "psionically endowed"
+      ]
+    }
+  },
+  {
+    "kangolese" : {
+      "ability_mods" : {},
+      "age" : "18",
+      "abilities" : [
+        "low light vision",
+        "sensitive hearing",
+        "extradimensional awareness",
+        "addicted to alkaloid a",
+        "light sensitive"
+      ]
+    }
+  },
+  {
+    "ostragon" : {
+      "ability_mods" : {
+        "strength" : "1",
+        "agility" : "1",
+        "intelligence" : "1",
+        "endurance" : "1"
+      },
+      "age" : "14",
+      "abilities" : []
+    }
+  },
+  {
+    "alpha" : {
+      "ability_mods" : {
+        "intelligence" : "1",
+        "charisma" : "1",
+        "strength" : "-1",
+        "endurance" : "-1"
+      },
+        "age" : "18",
+        "abilities" : [
+          "silver tongue"
+      ]
+    }
+  }
+  ]
+}
