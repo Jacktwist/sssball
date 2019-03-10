@@ -184,10 +184,6 @@ impl Object {
         }
     }
 
-<<<<<<< HEAD
-=======
-}
->>>>>>> 1ce4e58043052e37d38ed5a5b9b90a530d1da9b3
 
 // scales inches to ascii blocks for drawing
 
@@ -216,10 +212,9 @@ fn make_map() -> Map {
         map[0][y as usize] = Tile::wall();
         map[(MAP_WIDTH-1) as usize][y as usize] = Tile::wall();
     }
-<<<<<<< HEAD
-=======
+
     map[(MAP_WIDTH-1) as usize][(MAP_HEIGHT-1) as usize] = Tile::wall();
->>>>>>> 1ce4e58043052e37d38ed5a5b9b90a530d1da9b3
+
 
     //fill field boundary
     let mut x1 = (MAP_WIDTH/2) - (FIELD_WIDTH/2 + FIELD_BORDER_WIDTH)/SQUARE_SCALE;
