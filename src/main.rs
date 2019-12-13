@@ -10,7 +10,7 @@ const SQUARE_SCALE: i32 = 18;
 
 // actual size of the window
 const SCREEN_WIDTH: i32 = 80;
-const SCREEN_HEIGHT: i32 = 50;
+const SCREEN_HEIGHT: i32 = 60;
 
 // size of field in inches
 
@@ -49,6 +49,7 @@ const CAMERA_X_BOUND: i32 = CAMERA_WIDTH / 2 as i32;
 const CAMERA_Y_BOUND: i32 = CAMERA_HEIGHT / 2 as i32;
 const CAMERA_X_START: i32 = CAMERA_X_BOUND+1;
 const CAMERA_Y_START: i32 = CAMERA_Y_BOUND+1;
+pub enum MapType {FootballField, Menu, Ship, Starmap}
 type Map = Vec<Vec<Tile>>;
 
 // 20 frames-per-second maximum
@@ -299,16 +300,24 @@ fn handle_keys(root: &mut Root, player: &mut Object, map: &Map, camera: &mut Cam
     match key {
         Key { code: Enter, alt: true, .. } => {
             // Alt+Enter: toggle fullscreen
+            println!("alt + enter handled");
             let fullscreen = root.is_fullscreen();
             root.set_fullscreen(!fullscreen);
         }
         Key { code: Escape, .. } => return true,  // exit game
-
         // movement keys
         Key { code: Up, .. } => player.move_by(0, -1, map),
+        Key { code: NumPad8, .. } => player.move_by(0, -1, map),
         Key { code: Down, .. } => player.move_by(0, 1, map),
+        Key { code: NumPad2, .. } => player.move_by(0, 1, map),
         Key { code: Left, .. } => player.move_by(-1, 0, map),
+        Key { code: NumPad4, .. } => player.move_by(-1, 0, map),
         Key { code: Right, .. } => player.move_by(1, 0, map),
+        Key { code: NumPad6, .. } => player.move_by(1, 0, map),
+        Key { code: NumPad9, .. } => player.move_by(1, -1, map),
+        Key { code: NumPad3, .. } => player.move_by(1, 1, map),
+        Key { code: NumPad1, .. } => player.move_by(-1, 1, map),
+        Key { code: NumPad7, .. } => player.move_by(-1, -1, map),
         Key { printable: 'w', .. } => camera.move_by(0, -1),
         Key { printable: 's', .. } => camera.move_by(0, 1),
         Key { printable: 'a', .. } => camera.move_by(-1, 0),
@@ -321,11 +330,12 @@ fn handle_keys(root: &mut Root, player: &mut Object, map: &Map, camera: &mut Cam
 
 fn main() {
     let mut root = Root::initializer()
-        .font("terminal16x16_gs_ro.png", FontLayout::AsciiInRow)
-        .font_type(FontType::Greyscale)
-        .size(SCREEN_WIDTH, SCREEN_HEIGHT)
-        .title("Rust/libtcod tutorial")
-        .init();
+    .font("terminal16x16_gs_ro.png", FontLayout::AsciiInRow)
+    .font_type(FontType::Greyscale)
+    .size(SCREEN_WIDTH, SCREEN_HEIGHT)
+    .title("SssBall")
+    .init();
+    root.set_fullscreen(true);
     tcod::system::set_fps(LIMIT_FPS);
     let mut con = Offscreen::new(MAP_WIDTH, MAP_HEIGHT);
 
